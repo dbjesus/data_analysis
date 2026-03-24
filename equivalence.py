@@ -1,3 +1,27 @@
+
+#!/usr/bin/env python3
+
+'''
+Como script via terminal, execute python equivalence.py folder
+folder deve conter o arquivo submit.sh e o arquivo nm.nm.
+O autocomplete funcionara
+
+Como biblioteca via python, inclua:
+import equivalence
+
+equivalence.eq_rule("folder")
+
+OBS: Se o arquivo de submissao e de nome nao forem, 
+submit.sh e nm.nm, respectivamente,
+voce precisa alterar os nomes dentro deste programa e adequa-lo a sua necessidade.
+
+uso em sequencia:
+for f in $(ls -d */); do python3 equivalence.py "$f"; echo "$f"; wait; done
+
+o wait eh recomendado se o numero de diretorios for grande ou se utilizar processamento paralelo
+com mais processos que nucleos
+'''
+
 def eq_rule(path):
     #funcao1 retornar a regra de equivalencia
     
@@ -59,13 +83,14 @@ def map_val_err(path):
     mapa_val = dict(zip(dimero,param))
     mapa_err = dict(zip(dimero,err))
 
-    return mapa_val,mapa_err
+    return mapa_val, mapa_err, dimero, header
 #mapa_val,mapa_err = map_val_err(path)
 #funcionou
 
 #funcao3 salvar o arquivo
 #salvando o novo arquivo de parametros
-def param_save(path,mapa_val,mapa_err):
+#def param_save(path,mapa_val,mapa_err):
+def param_save(path, mapa_val, mapa_err, regras, dimero, header):
 
     """
     Recebe o caminho da pasta e salva o arquivo de parametros nm-av-std.dat
@@ -91,22 +116,27 @@ def param_save(path,mapa_val,mapa_err):
         print("Arquivo criado com sucesso")
     except Exception as e:
         print("Erro ao criar arquivo:", e)
-        
-    def main():
-    path=input("Qual o diretorio onde se encontra ambos: \nArquivo submit.sh \nArquivo nm-av-std-1000.dat")#"2026_02_19/"
-    regras = eq_rule(path)
-    mapa_val,mapa_err = map_val_err(path)
-    param_save(path,mapa_val, mapa_err)
-    
-    
-if __name__ == "__main__":
-    
+
+
+import sys
+
+def main():
     '''
     Para rodar, execute no terminal:
-    python equivalence.py
+    python equivalence.py diretorio
 
     escreva a pasta seguida da barra: "/"
     '''
     
-    main()
-    
+    if len(sys.argv) < 2:
+        print("Uso: python equivalence.py <diretorio>")
+        sys.exit(1)
+
+    path = sys.argv[1]
+
+    if "/" not in path:
+        path += "/"
+
+    regras = eq_rule(path)
+    mapa_val, mapa_err, dimero, header = map_val_err(path)
+    param_save(path, mapa_val, mapa_err, regras, dimero, header)
